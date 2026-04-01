@@ -2,7 +2,27 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #18181b;
+  --color-muted: #71717a;
+  --color-tag-bg: rgba(0, 0, 0, 0.04);
+  --color-tag-border: rgba(0, 0, 0, 0.12);
+  --color-accent-cyan: #0891b2;
+  --color-accent-purple: #7c3aed;
+  --gradient-brand: linear-gradient(
+    115deg,
+    #0891b2 0%,
+    #22d3ee 45%,
+    #0e7490 78%,
+    #67e8f9 100%
+  );
+  --gradient-button: linear-gradient(105deg, #22d3ee 0%, #a5f3fc 55%, #ecfeff 100%);
+  --gradient-border: linear-gradient(
+    135deg,
+    rgba(8, 145, 178, 0.55),
+    rgba(255, 255, 255, 0.9),
+    rgba(34, 211, 238, 0.4)
+  );
+  --radius: 0;
 }
 
 @theme inline {
@@ -10,17 +30,62 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.font-serif-display {
+  font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+}
+
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-border-wrap {
+  position: relative;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: var(--gradient-border);
+}
+
+.gradient-border-wrap > .inner {
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.mesh-bg {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(8, 145, 178, 0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(124, 58, 237, 0.04), transparent);
+}
+
+.hero-surface {
+  background: transparent;
+  position: relative;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 45s linear infinite;
 }
