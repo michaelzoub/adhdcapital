@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { MobileNav } from "@/components/MobileNav";
 import { Button, Container } from "@/components/ui";
+import { SOCIAL_X_URL } from "@/lib/site";
 
 const nav = [
   { label: "Thesis", href: "/#thesis" },
@@ -53,24 +54,15 @@ export function Header() {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto hidden shrink-0 items-center gap-2 sm:gap-3 md:flex">
+          <div className="ml-auto hidden shrink-0 md:flex">
             <Button
-              href="https://x.com/CapitalADHD"
+              href={SOCIAL_X_URL}
               target="_blank"
               rel="noopener noreferrer"
               variant="primary"
               className="!px-4 !py-2.5 font-mono text-[10px] uppercase tracking-[0.14em]"
             >
               Research & updates
-            </Button>
-            <Button
-              variant="ghost"
-              href="https://x.com/CapitalADHD"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-[10px] uppercase tracking-wider !px-2 !py-2 text-zinc-600 sm:!px-3"
-            >
-              @CapitalADHD
             </Button>
           </div>
           <MobileNav links={mobileNavLinks} />

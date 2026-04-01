@@ -21,43 +21,44 @@ export function AnnouncementBar() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -14 }}
           transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-          className="border-b border-white/10 bg-black"
+          className="w-full border-b border-white/10 bg-black"
         >
-          <Container className="flex flex-col gap-2 py-2.5 md:flex-row md:items-center md:gap-8 md:py-2.5">
-            {/* Row 1 mobile: label + CTA | dismiss. Desktop: merged into one row with message between */}
-            <div className="flex items-center justify-between gap-4 md:contents">
-              <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 md:shrink-0">
-                <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 md:text-[11px]">
-                  Research memo
-                </span>
-                <Link
-                  href="/#thesis"
-                  className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-white underline decoration-white/35 underline-offset-4 transition-colors hover:decoration-[var(--color-accent-cyan)] md:text-[11px]"
+          <Container className="max-w-none px-3 py-3 md:px-8 md:py-2.5 lg:px-12">
+            {/* md+: equal side tracks so the center line sits in true viewport center */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-3 lg:gap-5">
+              <div className="flex min-w-0 items-center justify-between gap-3 md:justify-self-start">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400 md:text-[11px] md:font-medium md:tracking-[0.16em] md:text-white">
+                    Research memo
+                  </span>
+                  <Link
+                    href="/#thesis"
+                    className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white underline decoration-white/40 underline-offset-[3px] transition-colors hover:decoration-[var(--color-accent-cyan)] md:text-[11px] md:font-medium"
+                  >
+                    Read thesis →
+                  </Link>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  className="shrink-0 rounded border border-white/15 bg-white/5 px-2.5 py-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-white/25 hover:text-zinc-200 md:hidden"
+                  aria-label="Dismiss announcement"
                 >
-                  Read thesis →
-                </Link>
+                  Dismiss
+                </button>
               </div>
+              <p className="min-w-0 justify-self-center text-balance text-center font-serif-display text-[13px] leading-snug tracking-normal text-zinc-400 md:max-w-[min(100%,48rem)] md:px-2 md:text-[12px] md:uppercase md:leading-snug md:tracking-[0.06em] md:text-white">
+                Why crypto, fintech, deep tech, and anything in between rewards obsessive due diligence.
+              </p>
               <button
                 type="button"
                 onClick={dismiss}
-                className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:text-zinc-300 md:hidden"
+                className="hidden shrink-0 justify-self-end font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-400 transition-colors hover:text-white md:block"
                 aria-label="Dismiss announcement"
               >
                 Dismiss
               </button>
             </div>
-            <p className="max-w-none text-center font-mono text-[10px] font-medium uppercase leading-snug tracking-[0.1em] text-zinc-400 md:min-w-0 md:flex-1 md:text-left md:text-[11px] md:leading-normal md:tracking-[0.14em]">
-              Why crypto, fintech, deep tech, and anything in between rewards obsessive due
-              diligence.
-            </p>
-            <button
-              type="button"
-              onClick={dismiss}
-              className="hidden shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500 transition-colors hover:text-zinc-300 md:block"
-              aria-label="Dismiss announcement"
-            >
-              Dismiss
-            </button>
           </Container>
         </motion.div>
       ) : null}

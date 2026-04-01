@@ -24,16 +24,39 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://adhdcapital.xyz";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title:
     "ADHD Capital | Research firm — crypto, fintech, deep tech, and anything in between",
   description:
     "ADHD Capital is a research-led collective focused on crypto, fintech, deep tech, and anything in between. We publish memos, models, and data—capital is secondary to the work.",
   openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "ADHD Capital",
     title: "ADHD Capital",
     description:
       "Research-first collective covering crypto, fintech, deep tech, and anything in between. Evidence, not headlines.",
+    images: [
+      {
+        url: "/adhd_banner.png",
+        width: 1600,
+        height: 529,
+        alt: "ADHD Capital — research firm",
+      },
+    ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "ADHD Capital",
+    description:
+      "Research-first collective covering crypto, fintech, deep tech, and anything in between.",
+    images: ["/adhd_banner.png"],
+  },
+  // Discord (and Slack, iMessage, etc.) unfurl links using standard Open Graph tags — same as
+  // `openGraph` above, including `images` and `metadataBase` for absolute image URLs.
 };
 
 export default function RootLayout({
