@@ -24,23 +24,23 @@ import { Button, Container, SectionLabel, Tag } from "@/components/ui";
 /** Mandate line used in hero marquee and sitewide positioning. */
 const STRIP_MANDATE = "Crypto, fintech, deep tech, and anything in between";
 
-/** Hero strip — who we work alongside (single pass; PartnersMarquee duplicates for the loop). */
+/** Hero strip — who we work alongside (`voice` drives font treatment in PartnersMarquee). */
 const partnersMarqueeLabels = [
-  "Founders",
-  "Crypto",
-  "Fintech",
-  "Deep tech",
-  "Spearheaders",
-  "Protocols",
-  "DAOs",
-  "Labs",
-  "Infrastructure",
-  "Token teams",
-  "Frontier AI",
-  "Robotics",
-  "Custody & wallets",
-  "Solo researchers",
-  "Institutions",
+  { label: "Founders", voice: "serif" },
+  { label: "Crypto", voice: "accent" },
+  { label: "Fintech", voice: "mono" },
+  { label: "Deep tech", voice: "serif" },
+  { label: "Spearheaders", voice: "sans" },
+  { label: "Protocols", voice: "accent" },
+  { label: "DAOs", voice: "serif" },
+  { label: "Labs", voice: "mono" },
+  { label: "Infrastructure", voice: "mono" },
+  { label: "Token teams", voice: "sans" },
+  { label: "Frontier AI", voice: "accent" },
+  { label: "Robotics", voice: "mono" },
+  { label: "Custody & wallets", voice: "mono" },
+  { label: "Solo researchers", voice: "serif" },
+  { label: "Institutions", voice: "sans" },
 ] as const;
 
 const tickerItems = [
@@ -88,19 +88,19 @@ const team = [
     handle: "Feuter",
     image: "/feuter.jpg",
     role: "Analytics & company research",
-    city: "Montréal",
+    city: "Singapore",
     xUrl: "https://x.com/feuters",
     blurb:
-      "HEC student with VC exposure—deep on analytics, modelling, and company analysis. Former owner of a contracting business; brings operator judgment to diligence.",
+      "Graduate training with VC exposure—deep on analytics, modelling, and company analysis. Former owner of a contracting business; brings operator judgment to diligence.",
   },
   {
     handle: "Kafka",
     image: "/kafka.jpg",
     role: "Technical research",
-    city: "Montréal",
+    city: "NYC",
     xUrl: "https://x.com/wenkafka",
     blurb:
-      "Computer science at Université de Montréal; hands-on engineering with projects spanning YC- and Paradigm-style stacks. Codes, reviews, and stress-tests assumptions.",
+      "Computer science background; hands-on engineering with projects spanning YC- and Paradigm-style stacks. Codes, reviews, and stress-tests assumptions.",
   },
 ];
 
@@ -193,9 +193,9 @@ function HeroResearchPanel() {
 function Ticker() {
   const doubled = [...tickerItems, ...tickerItems];
   return (
-    <div className="relative overflow-hidden border-y border-zinc-200 bg-zinc-100 py-3">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-zinc-100 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-zinc-100 to-transparent" />
+    <div className="relative overflow-hidden border-b border-zinc-200/35 bg-[#e8eaed] py-3">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#e8eaed] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#e8eaed] to-transparent" />
       <div className="flex w-max animate-marquee gap-16 md:gap-20 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-zinc-600">
         {doubled.map((label, i) => (
           <span
@@ -272,7 +272,7 @@ export default function Home() {
                   </HeroStaggerChild>
                 </HeroStaggerChild>
 
-                <HeroStaggerChild className="mt-14 border-t border-zinc-300/80 pt-10 md:mt-16 md:pt-12">
+                <HeroStaggerChild className="mt-14 pt-8 md:mt-16 md:pt-10">
                   <p className="text-center font-mono text-[10px] font-medium uppercase tracking-[0.28em] text-zinc-600 md:text-[11px]">
                     We work alongside
                   </p>
@@ -346,11 +346,12 @@ export default function Home() {
                     Geography
                   </p>
                   <p className="mt-4 font-sans text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-                    Montréal <span className="text-zinc-500">×2</span> · Barcelona{" "}
+                    Singapore <span className="text-zinc-500">×1</span> · NYC{" "}
+                    <span className="text-zinc-500">×1</span> · Barcelona{" "}
                     <span className="text-zinc-500">×1</span>
                   </p>
                   <p className="mt-4 font-serif-display text-sm leading-relaxed text-zinc-600">
-                    Built across North America and Europe—remote-first review cycles with on-site
+                    Built across Asia, North America, and Europe—remote-first review cycles with on-site
                     time when hardware or lab work demands it.
                   </p>
                 </div>
