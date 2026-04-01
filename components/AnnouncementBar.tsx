@@ -25,7 +25,7 @@ export function AnnouncementBar() {
         >
           <Container className="max-w-none px-3 py-2 md:px-8 md:py-2.5 lg:px-12">
             {/* Mobile: single row, memo + thesis left, dismiss right (text only). Desktop: 3-col + caption. */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-3 lg:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] md:items-center md:gap-3 lg:gap-5">
               <div className="flex min-h-10 w-full items-center justify-between gap-2 md:contents md:min-h-0">
                 <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-x-2.5 sm:gap-x-3 md:min-w-0 md:flex-initial md:justify-self-start">
                   <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-white md:text-[11px] md:font-medium md:tracking-[0.16em]">
@@ -47,7 +47,7 @@ export function AnnouncementBar() {
                   Dismiss
                 </button>
               </div>
-              <p className="hidden max-w-none text-center font-mono text-[10px] font-medium uppercase leading-snug tracking-[0.1em] text-zinc-400 md:block md:min-w-0 md:flex-1 md:text-left md:text-[11px] md:leading-normal md:tracking-[0.14em]">
+              <p className="hidden max-w-none text-center font-mono text-[10px] font-medium uppercase leading-snug tracking-[0.1em] text-zinc-400 text-balance md:block md:w-full md:min-w-0 md:text-center md:text-[11px] md:leading-normal md:tracking-[0.14em]">
                 Why crypto, fintech, deep tech, and anything in between rewards obsessive due diligence.
               </p>
               <button
