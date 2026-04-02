@@ -17,6 +17,8 @@ import { PartnersMarquee } from "@/components/hero/PartnersMarquee";
 import { ScrollMouseHint } from "@/components/hero/ScrollMouseHint";
 import { SectionReveal } from "@/components/hero/SectionReveal";
 import { StaggerItem, StaggerOnView } from "@/components/hero/StaggerOnView";
+import Earth from "@/components/ui/globe";
+import { Ripple } from "@/registry/magicui/ripple";
 import { ThesisAiCallout } from "@/components/thesis/ThesisAiCallout";
 import { ThesisFocusSteps } from "@/components/thesis/ThesisFocusSteps";
 import { Button, Container, SectionLabel, Tag } from "@/components/ui";
@@ -121,7 +123,7 @@ function WhyWeExistSectionNav() {
         <Link
           key={item.href}
           href={item.href}
-          className="inline-flex items-center gap-1.5 border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-700 transition-colors hover:border-zinc-500 hover:text-zinc-900"
+          className="inline-flex items-center gap-1.5 border border-zinc-300 bg-white px-2.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-zinc-700 transition-colors hover:border-zinc-500 hover:text-zinc-900"
         >
           {item.label}
           <span className="text-zinc-500" aria-hidden>
@@ -176,7 +178,9 @@ function HeroResearchPanel() {
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan-800/80">
                   {row.label}
                 </p>
-                <p className="mt-1 text-sm leading-snug text-zinc-900">{row.body}</p>
+                <p className="mt-1 font-serif-display text-sm leading-snug text-zinc-900">
+                  {row.body}
+                </p>
               </li>
             ))}
           </ul>
@@ -297,12 +301,21 @@ export default function Home() {
                   not under-hyped.
                 </h2>
               </div>
-              <div className="mt-12 border border-dashed border-zinc-300 bg-zinc-50 p-4 md:p-8">
-                <p className="max-w-2xl font-serif-display text-lg leading-relaxed text-zinc-700">
-                  We bias toward teams who want reviewers that read code, cite sources, and write the
-                  uncomfortable questions into the appendix—whether or not a check ever follows.
-                </p>
-                <WhyWeExistSectionNav />
+              <div className="mt-12">
+                <div className="relative overflow-hidden border border-dashed border-zinc-300 bg-zinc-50 p-4 md:p-8">
+                  <div className="pointer-events-none absolute inset-0 opacity-70" aria-hidden>
+                    <Ripple />
+                  </div>
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-zinc-50 to-transparent"
+                    aria-hidden
+                  />
+                  <p className="max-w-2xl font-serif-display text-lg leading-relaxed text-zinc-700">
+                    We bias toward teams who want reviewers that read code, cite sources, and write the
+                    uncomfortable questions into the appendix—whether or not a check ever follows.
+                  </p>
+                  <WhyWeExistSectionNav />
+                </div>
               </div>
             </Container>
           </section>
@@ -342,19 +355,28 @@ export default function Home() {
                     no siloed “opinions without work product.”
                   </p>
                 </div>
-                <div className="border border-dashed border-zinc-400 bg-white/95 p-7 md:p-8">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                    Geography
-                  </p>
-                  <p className="mt-4 font-sans text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
-                    Singapore <span className="text-zinc-500">×1</span> · NYC{" "}
-                    <span className="text-zinc-500">×1</span> · Barcelona{" "}
-                    <span className="text-zinc-500">×1</span>
-                  </p>
-                  <p className="mt-4 font-serif-display text-sm leading-relaxed text-zinc-600">
-                    Built across Asia, North America, and Europe—remote-first review cycles with on-site
-                    time when hardware or lab work demands it.
-                  </p>
+                <div className="relative overflow-hidden border border-dashed border-zinc-400 bg-white/95 p-7 md:p-8">
+                  <div className="pointer-events-none absolute inset-0" aria-hidden>
+                    <div className="relative flex size-full items-center justify-center overflow-hidden px-10 pt-6 pb-24 md:pb-32">
+                      <div className="absolute inset-0 bg-[radial-gradient(#5875d630_1px,rgba(255,255,255,0)_1px)] bg-[size:20px_20px] opacity-80" />
+                      <Earth className="w-full max-w-[520px]" />
+                      <div className="absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_200%,rgba(0,0,0,0.14),rgba(255,255,255,0))]" />
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                      Geography
+                    </p>
+                    <p className="mt-4 font-sans text-2xl font-semibold tracking-tight text-zinc-900 md:text-3xl">
+                      Singapore <span className="text-zinc-500">×1</span> · NYC{" "}
+                      <span className="text-zinc-500">×1</span> · Barcelona{" "}
+                      <span className="text-zinc-500">×1</span>
+                    </p>
+                    <p className="mt-4 font-serif-display text-sm leading-relaxed text-zinc-600">
+                      Built across Asia, North America, and Europe—remote-first review cycles with on-site
+                      time when hardware or lab work demands it.
+                    </p>
+                  </div>
                 </div>
                 <div className="border border-dashed border-zinc-400 bg-white/95 p-7 md:p-8">
                   <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-500">

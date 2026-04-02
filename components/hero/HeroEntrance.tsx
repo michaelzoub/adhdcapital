@@ -5,6 +5,11 @@ import type { ReactNode } from "react";
 
 import { heroColumnStagger, heroStaggerItem, heroStaggerParent } from "./hero-motion";
 
+type HeroMotionDivProps = Omit<HTMLMotionProps<"div">, "children" | "className"> & {
+  children?: ReactNode;
+  className?: string;
+};
+
 type HeroEntranceProps = {
   children: ReactNode;
 };
@@ -19,7 +24,7 @@ export function HeroStaggerRoot({
   children,
   className,
   ...rest
-}: HTMLMotionProps<"div">) {
+}: HeroMotionDivProps) {
   return (
     <motion.div
       className={className}
@@ -37,7 +42,7 @@ export function HeroStaggerChild({
   children,
   className,
   ...rest
-}: HTMLMotionProps<"div">) {
+}: HeroMotionDivProps) {
   return (
     <motion.div className={className} variants={heroStaggerItem} {...rest}>
       {children}
@@ -49,7 +54,7 @@ export function HeroColumnStagger({
   children,
   className,
   ...rest
-}: HTMLMotionProps<"div">) {
+}: HeroMotionDivProps) {
   return (
     <motion.div
       className={className}
@@ -67,7 +72,7 @@ export function HeroLineItem({
   children,
   className,
   ...rest
-}: HTMLMotionProps<"div">) {
+}: HeroMotionDivProps) {
   return (
     <motion.div className={className} variants={heroStaggerItem} {...rest}>
       {children}
