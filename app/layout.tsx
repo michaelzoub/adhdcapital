@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "ADHD Capital",
     title: "ADHD Capital",
     description:
-      "Research-first collective covering crypto, fintech, deep tech, and anything in between. Evidence, not headlines.",
+      "Research-first collective covering crypto, fintech, deep tech, and anything in between.",
     images: [
       {
         url: "/adhd_banner.png",
