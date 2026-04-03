@@ -23,6 +23,10 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://adhdcapital.xyz";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/icon.png", type: "image/png" }],
+  },
   title:
     "ADHD Capital | Research firm — crypto, fintech, deep tech, and anything in between",
   description:
