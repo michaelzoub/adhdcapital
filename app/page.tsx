@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { AtAGlanceFloatingPaths } from "@/components/backgrounds/FloatingPaths";
 import PixelBlast from "@/components/backgrounds/PixelBlast";
+import PixelHammer from "@/components/backgrounds/PixelHammer";
+import PixelMountain from "@/components/backgrounds/PixelMountain";
+import PixelNuclear from "@/components/backgrounds/PixelNuclear";
 import Threads from "@/components/backgrounds/Threads";
 import { TopographyBackground } from "@/components/backgrounds/TopographyBackground";
 import { Footer } from "@/components/Footer";
@@ -73,6 +76,8 @@ const focusSteps = [
     body: "Crypto networks, fintech rails, L1/L2 and DeFi plumbing, wallets and infra, AI systems, robotics, and the messy layers in between—we say no when the work doesn't match the bar.",
   },
 ];
+
+const teamBgs = [PixelNuclear, PixelMountain, PixelHammer] as const;
 
 const team = [
   {
@@ -338,7 +343,7 @@ export default function Home() {
                     <PixelBlast
                       variant="square"
                       pixelSize={4}
-                      color="#ddeaf6"
+                      color="#cffafe"
                       patternScale={2}
                       patternDensity={1}
                       pixelSizeJitter={0}
@@ -372,8 +377,8 @@ export default function Home() {
                   <div className="pointer-events-none absolute inset-0" aria-hidden>
                     <div className="relative flex size-full items-center justify-center overflow-hidden px-10 pt-6 pb-24 md:pb-32">
                       <div className="absolute inset-0 bg-[radial-gradient(#5875d630_1px,rgba(255,255,255,0)_1px)] bg-[size:20px_20px] opacity-80" />
-                      <Earth className="w-full max-w-[520px]" />
-                      <div className="absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_200%,rgba(0,0,0,0.14),rgba(255,255,255,0))]" />
+                      <Earth className="w-full max-w-[520px] opacity-60" />
+                      <div className="absolute inset-0 h-full bg-[radial-gradient(circle_at_50%_200%,rgba(0,0,0,0.08),rgba(255,255,255,0))]" />
                     </div>
                   </div>
                   <div className="relative">
@@ -394,7 +399,7 @@ export default function Home() {
                 <div className="relative overflow-hidden border border-dashed border-zinc-400 bg-white/95 p-7 md:p-8">
                   <div className="pointer-events-none absolute inset-0" aria-hidden>
                     <Threads
-                      color={[0.87, 0.92, 0.965]}
+                      color={[0.93, 0.97, 0.99]}
                       amplitude={1}
                       distance={0}
                       enableMouseInteraction
@@ -480,10 +485,15 @@ export default function Home() {
                 The people behind the desk—operators and researchers who publish before they pitch.
               </p>
               <StaggerOnView className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-10 lg:gap-12">
-                {team.map((member) => (
+                {team.map((member, i) => {
+                  const CardBg = teamBgs[i];
+                  return (
                   <StaggerItem key={member.handle}>
-                    <article className="flex h-full flex-col overflow-hidden border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-                      <div className="flex justify-center px-7 pt-7 md:justify-start md:px-7">
+                    <article className="relative flex h-full flex-col overflow-hidden border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                      <div className="pointer-events-none absolute inset-0 opacity-70" aria-hidden>
+                        <CardBg />
+                      </div>
+                      <div className="flex justify-center px-7 pt-7 md:justify-start md:px-7 relative">
                         <div className="relative aspect-[4/5] w-[min(100%,10rem)] shrink-0 bg-zinc-100 ring-1 ring-zinc-200/90 sm:w-[10.5rem] md:w-[9.25rem] lg:w-[10rem]">
                           <Image
                             src={member.image}
@@ -494,7 +504,7 @@ export default function Home() {
                           />
                         </div>
                       </div>
-                      <div className="flex flex-1 flex-col px-7 pb-7 pt-6">
+                      <div className="relative flex flex-1 flex-col px-7 pb-7 pt-6">
                         <div className="h-px w-10 bg-zinc-900/85" />
                         <p className="mt-4 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-900">
                           {member.handle}
@@ -521,7 +531,8 @@ export default function Home() {
                       </div>
                     </article>
                   </StaggerItem>
-                ))}
+                  );
+                })}
               </StaggerOnView>
             </Container>
           </section>
