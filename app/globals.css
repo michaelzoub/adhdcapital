@@ -77,6 +77,15 @@ body {
   position: relative;
 }
 
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
 @keyframes marquee {
   0% {
     transform: translateX(0);

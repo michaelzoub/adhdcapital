@@ -37,80 +37,104 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-zinc-800 bg-black text-white">
       <FooterCornerSquarcles />
+
       <SectionReveal amount={0.1} delay={0.04} className="relative z-[1] py-16 md:py-20">
         <Container>
-          <div className="grid gap-12 md:grid-cols-[1fr_1fr_1fr_auto] md:items-start md:gap-10">
-            {columns.map((col) => (
-              <div key={col.title}>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                  {col.title}
+          {/*
+           * Two-column layout:
+           * Left  — oversized italic brand mark + legal disclaimer directly below
+           * Right — nav columns + contact links
+           */}
+          <div className="grid gap-12 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-16">
+
+            {/* ── Left: brand mark + legal ── */}
+            <div className="min-w-0 overflow-hidden">
+              <p
+                className="font-serif-display italic leading-[0.92] tracking-tight select-none"
+                style={{ fontSize: "clamp(4.5rem, 16vw, 15rem)", color: "#1e1e1e" }}
+                aria-hidden
+              >
+                Caliga
+              </p>
+
+              <div className="mt-8 max-w-lg space-y-3">
+                <p className="font-serif-display text-xs leading-relaxed text-zinc-500">
+                  Caliga publishes research and commentary for informational and educational
+                  purposes only and does not provide investment advice, investment recommendations,
+                  or an offer or solicitation to buy or sell any security or financial instrument.
+                  Any investment activity is high risk; do your own diligence and consult qualified
+                  advisors.
                 </p>
-                <nav className="mt-4 space-y-2" aria-label={col.title}>
-                  {col.links.map((l) => {
-                    const cls =
-                      "block font-sans text-sm font-medium text-zinc-100 transition-colors hover:text-white";
-
-                    if ("disabled" in l && l.disabled) {
-                      return (
-                        <span key={l.label} className="block font-sans text-sm text-zinc-600">
-                          {l.label}
-                        </span>
-                      );
-                    }
-
-                    if ("external" in l && l.external) {
-                      return (
-                        <a
-                          key={l.label}
-                          href={l.href}
-                          className={cls}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {l.label}
-                        </a>
-                      );
-                    }
-
-                    return (
-                      <Link key={l.label} href={l.href} className={cls}>
-                        {l.label}
-                      </Link>
-                    );
-                  })}
-                </nav>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+                  © {new Date().getFullYear()} Caliga. All rights reserved.
+                </p>
               </div>
-            ))}
-
-            <div className="md:justify-self-end">
-              <a
-                href="mailto:support@efimov.xyz"
-                className="block font-sans text-sm font-semibold text-white underline decoration-zinc-600 underline-offset-4 transition-colors hover:decoration-zinc-400"
-              >
-                support@efimov.xyz
-              </a>
-              <a
-                href={SOCIAL_X_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 block font-sans text-sm font-semibold text-white underline decoration-zinc-600 underline-offset-4 transition-colors hover:decoration-zinc-400"
-              >
-                {SOCIAL_X_HANDLE_DISPLAY}
-              </a>
             </div>
-          </div>
 
-          <div className="mt-14 border-t border-zinc-800 pt-10">
-            <p className="max-w-4xl font-serif-display text-xs leading-relaxed text-zinc-500">
-              Meridia publishes research and commentary for informational and educational
-              purposes only and does not provide investment advice, investment recommendations, or
-              an offer or solicitation to buy or sell any security or financial instrument. Any
-              investment activity is high risk; do your own diligence and consult qualified
-              advisors.
-            </p>
-            <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-zinc-600">
-              © {new Date().getFullYear()} Meridia. All rights reserved.
-            </p>
+            {/* ── Right: nav grid + contact ── */}
+            <div className="flex flex-col gap-10 lg:items-end">
+              <div className="grid grid-cols-3 gap-8 md:gap-10">
+                {columns.map((col) => (
+                  <div key={col.title}>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                      {col.title}
+                    </p>
+                    <nav className="mt-4 space-y-2" aria-label={col.title}>
+                      {col.links.map((l) => {
+                        const cls =
+                          "block font-sans text-sm font-medium text-zinc-100 transition-colors hover:text-white";
+
+                        if ("disabled" in l && l.disabled) {
+                          return (
+                            <span key={l.label} className="block font-sans text-sm text-zinc-600">
+                              {l.label}
+                            </span>
+                          );
+                        }
+
+                        if ("external" in l && l.external) {
+                          return (
+                            <a
+                              key={l.label}
+                              href={l.href}
+                              className={cls}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {l.label}
+                            </a>
+                          );
+                        }
+
+                        return (
+                          <Link key={l.label} href={l.href} className={cls}>
+                            {l.label}
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2 lg:text-right">
+                <a
+                  href="mailto:hello@caliga.xyz"
+                  className="font-sans text-sm font-semibold text-white underline decoration-zinc-600 underline-offset-4 transition-colors hover:decoration-zinc-400"
+                >
+                  hello@caliga.xyz
+                </a>
+                <a
+                  href={SOCIAL_X_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-sans text-sm font-semibold text-white underline decoration-zinc-600 underline-offset-4 transition-colors hover:decoration-zinc-400"
+                >
+                  {SOCIAL_X_HANDLE_DISPLAY}
+                </a>
+              </div>
+            </div>
+
           </div>
         </Container>
       </SectionReveal>
