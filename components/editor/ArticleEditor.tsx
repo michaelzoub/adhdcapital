@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import {
   Bold,
   Italic,
@@ -17,6 +18,7 @@ import {
   Code2,
   Link2,
   Minus,
+  ImageIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -64,6 +66,7 @@ export default function ArticleEditor({
   initialSlug = "",
 }: ArticleEditorProps) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [articleId, setArticleId] = useState<string | undefined>(initialId);
   const [title, setTitle] = useState(initialTitle);
@@ -75,27 +78,85 @@ export default function ArticleEditor({
   const [linkUrl, setLinkUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [copiedFor, setCopiedFor] = useState<"substack" | "x" | null>(null);
+  const [uploadCount, setUploadCount] = useState(0);
 
   const contentRef = useRef(initialContent);
   const isDirty = useRef(false);
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Stable ref so editorProps callbacks never go stale
+  const insertImageRef = useRef<(file: File) => Promise<void>>(async () => {});
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false }),
-      Placeholder.configure({
-        placeholder: "Start writing…",
-      }),
+      Placeholder.configure({ placeholder: "Start writing…" }),
+      Image.configure({ inline: false, allowBase64: false }),
     ],
     content: initialContent,
     immediatelyRender: false,
     onUpdate({ editor }) {
-      const html = editor.getHTML();
-      contentRef.current = html;
+      contentRef.current = editor.getHTML();
       isDirty.current = true;
     },
+    editorProps: {
+      // Drag-and-drop images onto the editor canvas
+      handleDrop(view, event, _slice, moved) {
+        if (moved) return false;
+        const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
+          f.type.startsWith("image/")
+        );
+        if (!files.length) return false;
+        event.preventDefault();
+        files.forEach((f) => insertImageRef.current(f));
+        return true;
+      },
+      // Paste images from clipboard
+      handlePaste(view, event) {
+        const files = Array.from(event.clipboardData?.files ?? []).filter(
+          (f) => f.type.startsWith("image/")
+        );
+        if (!files.length) return false;
+        event.preventDefault();
+        files.forEach((f) => insertImageRef.current(f));
+        return true;
+      },
+    },
   });
+
+  // Keep insertImageRef up-to-date whenever editor changes
+  useEffect(() => {
+    insertImageRef.current = async (file: File) => {
+      if (!editor) return;
+      setUploadCount((n) => n + 1);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/dashboard/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) {
+          const { error } = await res.json().catch(() => ({ error: res.statusText }));
+          alert(`Upload failed: ${error}`);
+          return;
+        }
+        const { url } = await res.json();
+        // After inserting the image (a leaf node), create a paragraph so
+        // the cursor has somewhere to go and the user can keep typing.
+        editor
+          .chain()
+          .focus()
+          .setImage({ src: url })
+          .createParagraphNear()
+          .focus()
+          .run();
+      } finally {
+        setUploadCount((n) => n - 1);
+      }
+    };
+  }, [editor]);
 
   // Auto-generate slug from title unless manually edited
   useEffect(() => {
@@ -139,10 +200,7 @@ export default function ArticleEditor({
           isDirty.current = false;
           setSaveStatus("saved");
           if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-          savedTimeoutRef.current = setTimeout(
-            () => setSaveStatus("idle"),
-            2500
-          );
+          savedTimeoutRef.current = setTimeout(() => setSaveStatus("idle"), 2500);
         }
       } catch {
         setSaveStatus("error");
@@ -155,14 +213,11 @@ export default function ArticleEditor({
   // Auto-save every 30s if dirty
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isDirty.current) {
-        doSave();
-      }
+      if (isDirty.current) doSave();
     }, 30000);
     return () => clearInterval(interval);
   }, [doSave]);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
@@ -182,8 +237,30 @@ export default function ArticleEditor({
     setShowLinkInput(false);
   }, [editor, linkUrl]);
 
+  const handleImageFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      files.forEach((f) => insertImageRef.current(f));
+      // Reset so the same file can be re-selected
+      e.target.value = "";
+    },
+    []
+  );
+
+  const isUploading = uploadCount > 0;
+
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Hidden file input for toolbar image button */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={handleImageFileInput}
+      />
+
       {/* Top bar */}
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3">
         <nav className="flex items-center gap-4">
@@ -198,15 +275,22 @@ export default function ArticleEditor({
           <span
             className={cn(
               "font-mono text-[10px] uppercase tracking-[0.15em] transition-colors",
-              saveStatus === "saving" && "text-zinc-400",
-              saveStatus === "saved" && "text-cyan-700",
-              saveStatus === "error" && "text-red-500",
-              saveStatus === "idle" && "invisible"
+              isUploading && "text-zinc-400",
+              !isUploading && saveStatus === "saving" && "text-zinc-400",
+              !isUploading && saveStatus === "saved" && "text-cyan-700",
+              !isUploading && saveStatus === "error" && "text-red-500",
+              !isUploading && saveStatus === "idle" && "invisible"
             )}
           >
-            {saveStatus === "saving" && "Saving…"}
-            {saveStatus === "saved" && "Saved"}
-            {saveStatus === "error" && "Save failed"}
+            {isUploading
+              ? `Uploading image${uploadCount > 1 ? "s" : ""}…`
+              : saveStatus === "saving"
+              ? "Saving…"
+              : saveStatus === "saved"
+              ? "Saved"
+              : saveStatus === "error"
+              ? "Save failed"
+              : ""}
           </span>
 
           <div className="h-4 w-px bg-zinc-200" />
@@ -238,14 +322,14 @@ export default function ArticleEditor({
 
           <button
             onClick={() => doSave()}
-            disabled={saveStatus === "saving"}
+            disabled={saveStatus === "saving" || isUploading}
             className="border border-zinc-300 px-4 py-1.5 font-sans text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-900 hover:text-zinc-900 disabled:opacity-40"
           >
             Save draft
           </button>
           <button
             onClick={() => doSave({ publish: true })}
-            disabled={isPublishing || saveStatus === "saving"}
+            disabled={isPublishing || saveStatus === "saving" || isUploading}
             className="border border-zinc-900 bg-zinc-900 px-4 py-1.5 font-sans text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40"
           >
             {isPublishing ? "Publishing…" : "Publish"}
@@ -300,27 +384,21 @@ export default function ArticleEditor({
         {editor && (
           <div className="mb-4 flex flex-wrap items-center gap-0.5 border border-zinc-200 p-1">
             <ToolbarButton
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 1 }).run()
-              }
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
               active={editor.isActive("heading", { level: 1 })}
               title="Heading 1"
             >
               <Heading1 size={15} />
             </ToolbarButton>
             <ToolbarButton
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 2 }).run()
-              }
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
               active={editor.isActive("heading", { level: 2 })}
               title="Heading 2"
             >
               <Heading2 size={15} />
             </ToolbarButton>
             <ToolbarButton
-              onClick={() =>
-                editor.chain().focus().toggleHeading({ level: 3 }).run()
-              }
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
               active={editor.isActive("heading", { level: 3 })}
               title="Heading 3"
             >
@@ -398,13 +476,22 @@ export default function ArticleEditor({
               <Link2 size={15} />
             </ToolbarButton>
             <ToolbarButton
-              onClick={() =>
-                editor.chain().focus().setHorizontalRule().run()
-              }
+              onClick={() => editor.chain().focus().setHorizontalRule().run()}
               active={false}
               title="Horizontal rule"
             >
               <Minus size={15} />
+            </ToolbarButton>
+
+            <div className="mx-1 h-4 w-px bg-zinc-200" />
+
+            <ToolbarButton
+              onClick={() => fileInputRef.current?.click()}
+              active={false}
+              title="Insert image"
+              disabled={isUploading}
+            >
+              <ImageIcon size={15} />
             </ToolbarButton>
           </div>
         )}
@@ -436,7 +523,24 @@ export default function ArticleEditor({
         {/* Editor body */}
         <EditorContent
           editor={editor}
-          className="prose prose-zinc max-w-none min-h-[400px] [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[400px] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-zinc-400 [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0"
+          className={cn(
+            "prose prose-zinc max-w-none min-h-[400px]",
+            "[&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[400px]",
+            // Placeholder
+            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:text-zinc-400",
+            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]",
+            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none",
+            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left",
+            "[&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0",
+            // Images
+            "[&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:h-auto",
+            "[&_.ProseMirror_img]:my-4 [&_.ProseMirror_img]:block",
+            "[&_.ProseMirror_img.ProseMirror-selectednode]:outline",
+            "[&_.ProseMirror_img.ProseMirror-selectednode]:outline-2",
+            "[&_.ProseMirror_img.ProseMirror-selectednode]:outline-cyan-600",
+            // Drop zone highlight while dragging
+            isUploading && "[&_.ProseMirror]:opacity-60"
+          )}
         />
       </div>
     </div>
@@ -447,11 +551,13 @@ function ToolbarButton({
   onClick,
   active,
   title,
+  disabled,
   children,
 }: {
   onClick: () => void;
   active: boolean;
   title: string;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -459,8 +565,9 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       title={title}
+      disabled={disabled}
       className={cn(
-        "flex h-7 w-7 items-center justify-center transition-colors",
+        "flex h-7 w-7 items-center justify-center transition-colors disabled:opacity-40",
         active
           ? "bg-zinc-900 text-white"
           : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
