@@ -11,6 +11,8 @@ export type WritingPost = {
   content: string;
   /** Formatted date string for display */
   publishedAt: string;
+  writtenBy: string | null;
+  coverImageUrl: string | null;
 };
 
 function formatDate(iso: string): string {
@@ -23,43 +25,51 @@ function formatDate(iso: string): string {
 
 export async function getWritingPosts(): Promise<WritingPost[]> {
   const supabase = createAnonClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("articles")
-    .select("id, title, subtitle, slug, published_at, content")
+    .select("*")
     .not("published_at", "is", null)
     .order("published_at", { ascending: false });
 
-  if (!data) return [];
+  if (error || !data) return [];
 
-  return data.map((row) => ({
-    id: row.id as string,
-    slug: row.slug as string,
-    title: row.title as string,
-    subtitle: (row.subtitle as string | null) ?? null,
-    excerpt: (row.subtitle as string) ?? "",
-    content: (row.content as string) ?? "",
-    publishedAt: formatDate(row.published_at as string),
-  }));
+  return data.map((row) => {
+    const r = row as Record<string, unknown>;
+    return {
+      id: r.id as string,
+      slug: r.slug as string,
+      title: r.title as string,
+      subtitle: (r.subtitle as string | null) ?? null,
+      excerpt: (r.subtitle as string) ?? "",
+      content: (r.content as string) ?? "",
+      publishedAt: formatDate(r.published_at as string),
+      writtenBy: typeof r.written_by === "string" ? r.written_by : null,
+      coverImageUrl: typeof r.cover_image_url === "string" ? r.cover_image_url : null,
+    };
+  });
 }
 
 export async function getWritingPostBySlug(slug: string): Promise<WritingPost | null> {
   const supabase = createAnonClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("articles")
-    .select("id, title, subtitle, slug, published_at, content")
+    .select("*")
     .eq("slug", slug)
     .not("published_at", "is", null)
     .maybeSingle();
 
-  if (!data) return null;
+  if (error || !data) return null;
 
+  const r = data as Record<string, unknown>;
   return {
-    id: data.id as string,
-    slug: data.slug as string,
-    title: data.title as string,
-    subtitle: (data.subtitle as string | null) ?? null,
-    excerpt: (data.subtitle as string) ?? "",
-    content: (data.content as string) ?? "",
-    publishedAt: formatDate(data.published_at as string),
+    id: r.id as string,
+    slug: r.slug as string,
+    title: r.title as string,
+    subtitle: (r.subtitle as string | null) ?? null,
+    excerpt: (r.subtitle as string) ?? "",
+    content: (r.content as string) ?? "",
+    publishedAt: formatDate(r.published_at as string),
+    writtenBy: typeof r.written_by === "string" ? r.written_by : null,
+    coverImageUrl: typeof r.cover_image_url === "string" ? r.cover_image_url : null,
   };
 }

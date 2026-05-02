@@ -49,21 +49,45 @@ export default async function WritingPage() {
               </li>
             ) : (
               posts.map((post) => (
-                <li key={post.slug} className="py-10">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                    {post.publishedAt}
-                  </p>
-                  <h2 className="mt-2 font-sans text-xl font-semibold text-zinc-900 md:text-2xl">
+                <li
+                  key={post.slug}
+                  className={
+                    post.coverImageUrl
+                      ? "grid gap-6 py-10 md:grid-cols-[11rem_minmax(0,1fr)] md:items-start md:gap-8"
+                      : "py-10"
+                  }
+                >
+                  {post.coverImageUrl ? (
                     <Link
                       href={`/writing/${post.slug}`}
-                      className="transition-colors hover:text-cyan-800"
+                      className="block border border-zinc-200 bg-zinc-50"
+                      aria-hidden
+                      tabIndex={-1}
                     >
-                      {post.title}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={post.coverImageUrl}
+                        alt=""
+                        className="aspect-[4/3] h-32 w-full object-cover md:h-auto md:min-h-[6.5rem]"
+                      />
                     </Link>
-                  </h2>
-                  <p className="mt-3 max-w-2xl font-serif-display text-sm leading-relaxed text-zinc-700 md:text-base">
-                    {post.excerpt}
-                  </p>
+                  ) : null}
+                  <div className="min-w-0">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+                      {post.publishedAt}
+                    </p>
+                    <h2 className="mt-2 font-sans text-xl font-semibold text-zinc-900 md:text-2xl">
+                      <Link
+                        href={`/writing/${post.slug}`}
+                        className="transition-colors hover:text-cyan-800"
+                      >
+                        {post.title}
+                      </Link>
+                    </h2>
+                    <p className="mt-3 max-w-2xl font-serif-display text-sm leading-relaxed text-zinc-700 md:text-base">
+                      {post.excerpt}
+                    </p>
+                  </div>
                 </li>
               ))
             )}

@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+/* Bare package name resolves from this file’s directory (app/), so use an explicit path */
+@plugin "../node_modules/@tailwindcss/typography";
 
 :root {
   --background: #ffffff;

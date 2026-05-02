@@ -13,7 +13,7 @@ export default async function EditArticlePage({ params }: Props) {
 
   const { data: article } = await supabase
     .from("articles")
-    .select("id, title, subtitle, content, slug, published_at")
+    .select("*")
     .eq("id", id)
     .maybeSingle();
 
@@ -26,6 +26,12 @@ export default async function EditArticlePage({ params }: Props) {
       initialSubtitle={(article.subtitle as string) ?? ""}
       initialContent={(article.content as string) ?? ""}
       initialSlug={(article.slug as string) ?? ""}
+      initialWrittenBy={
+        typeof article.written_by === "string" ? article.written_by : ""
+      }
+      initialCoverImageUrl={
+        typeof article.cover_image_url === "string" ? article.cover_image_url : ""
+      }
     />
   );
 }

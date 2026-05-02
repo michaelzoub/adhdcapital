@@ -46,6 +46,8 @@ interface ArticleEditorProps {
   initialSubtitle?: string;
   initialContent?: string;
   initialSlug?: string;
+  initialWrittenBy?: string;
+  initialCoverImageUrl?: string;
 }
 
 function slugify(text: string): string {
@@ -64,13 +66,18 @@ export default function ArticleEditor({
   initialSubtitle = "",
   initialContent = "",
   initialSlug = "",
+  initialWrittenBy = "",
+  initialCoverImageUrl = "",
 }: ArticleEditorProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   const [articleId, setArticleId] = useState<string | undefined>(initialId);
   const [title, setTitle] = useState(initialTitle);
   const [subtitle, setSubtitle] = useState(initialSubtitle);
+  const [writtenBy, setWrittenBy] = useState(initialWrittenBy);
+  const [coverImageUrl, setCoverImageUrl] = useState(initialCoverImageUrl);
   const [slug, setSlug] = useState(initialSlug);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!initialSlug);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
@@ -79,6 +86,7 @@ export default function ArticleEditor({
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [copiedFor, setCopiedFor] = useState<"substack" | "x" | null>(null);
   const [uploadCount, setUploadCount] = useState(0);
+  const [coverUploading, setCoverUploading] = useState(false);
 
   const contentRef = useRef(initialContent);
   const isDirty = useRef(false);
@@ -180,6 +188,8 @@ export default function ArticleEditor({
             subtitle,
             content: currentContent,
             slug,
+            writtenBy,
+            coverImageUrl,
           });
           if (result.redirectTo) {
             router.push(result.redirectTo);
@@ -192,6 +202,8 @@ export default function ArticleEditor({
             subtitle,
             content: currentContent,
             slug,
+            writtenBy,
+            coverImageUrl,
           });
           if (id && !articleId) {
             setArticleId(id);
@@ -207,7 +219,7 @@ export default function ArticleEditor({
         setIsPublishing(false);
       }
     },
-    [articleId, title, subtitle, slug, router]
+    [articleId, title, subtitle, slug, writtenBy, coverImageUrl, router]
   );
 
   // Auto-save every 30s if dirty
@@ -249,6 +261,37 @@ export default function ArticleEditor({
 
   const isUploading = uploadCount > 0;
 
+  const uploadCoverFile = useCallback(async (file: File) => {
+    setCoverUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/dashboard/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: res.statusText }));
+        alert(`Upload failed: ${error}`);
+        return;
+      }
+      const { url } = await res.json();
+      setCoverImageUrl(url);
+      isDirty.current = true;
+    } finally {
+      setCoverUploading(false);
+    }
+  }, []);
+
+  const handleCoverFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) void uploadCoverFile(file);
+      e.target.value = "";
+    },
+    [uploadCoverFile]
+  );
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hidden file input for toolbar image button */}
@@ -260,9 +303,16 @@ export default function ArticleEditor({
         className="hidden"
         onChange={handleImageFileInput}
       />
+      <input
+        ref={coverFileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleCoverFileInput}
+      />
 
-      {/* Top bar */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3">
+      {/* Top bar — toolbar uses top-14 to clear this row (~56px) */}
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3">
         <nav className="flex items-center gap-4">
           <a
             href="/dashboard/writing"
@@ -275,14 +325,25 @@ export default function ArticleEditor({
           <span
             className={cn(
               "font-mono text-[10px] uppercase tracking-[0.15em] transition-colors",
-              isUploading && "text-zinc-400",
-              !isUploading && saveStatus === "saving" && "text-zinc-400",
-              !isUploading && saveStatus === "saved" && "text-cyan-700",
-              !isUploading && saveStatus === "error" && "text-red-500",
-              !isUploading && saveStatus === "idle" && "invisible"
+              (isUploading || coverUploading) && "text-zinc-400",
+              !isUploading &&
+                !coverUploading &&
+                saveStatus === "saving" &&
+                "text-zinc-400",
+              !isUploading &&
+                !coverUploading &&
+                saveStatus === "saved" &&
+                "text-cyan-700",
+              !isUploading &&
+                !coverUploading &&
+                saveStatus === "error" &&
+                "text-red-500",
+              !isUploading && !coverUploading && saveStatus === "idle" && "invisible"
             )}
           >
-            {isUploading
+            {coverUploading
+              ? "Uploading cover…"
+              : isUploading
               ? `Uploading image${uploadCount > 1 ? "s" : ""}…`
               : saveStatus === "saving"
               ? "Saving…"
@@ -322,14 +383,16 @@ export default function ArticleEditor({
 
           <button
             onClick={() => doSave()}
-            disabled={saveStatus === "saving" || isUploading}
+            disabled={saveStatus === "saving" || isUploading || coverUploading}
             className="border border-zinc-300 px-4 py-1.5 font-sans text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-900 hover:text-zinc-900 disabled:opacity-40"
           >
             Save draft
           </button>
           <button
             onClick={() => doSave({ publish: true })}
-            disabled={isPublishing || saveStatus === "saving" || isUploading}
+            disabled={
+              isPublishing || saveStatus === "saving" || isUploading || coverUploading
+            }
             className="border border-zinc-900 bg-zinc-900 px-4 py-1.5 font-sans text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40"
           >
             {isPublishing ? "Publishing…" : "Publish"}
@@ -380,9 +443,72 @@ export default function ArticleEditor({
           />
         </div>
 
-        {/* Toolbar */}
+        <div className="mb-8 space-y-6 border-b border-zinc-200 pb-8">
+          <div>
+            <label className="block font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-400">
+              Written by
+            </label>
+            <input
+              type="text"
+              value={writtenBy}
+              onChange={(e) => {
+                setWrittenBy(e.target.value);
+                isDirty.current = true;
+              }}
+              placeholder="Name shown at the end of the article (optional)"
+              className="mt-2 w-full border border-zinc-200 bg-white px-3 py-2 font-sans text-sm text-zinc-800 outline-none placeholder:text-zinc-400 focus:border-zinc-400"
+            />
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-400">
+              Cover image
+            </p>
+            <div className="mt-2 flex flex-wrap items-start gap-4">
+              {coverImageUrl ? (
+                <div className="relative border border-zinc-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- remote Supabase URL */}
+                  <img
+                    src={coverImageUrl}
+                    alt="Cover preview"
+                    className="max-h-40 w-auto max-w-full object-contain"
+                  />
+                </div>
+              ) : null}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => coverFileInputRef.current?.click()}
+                  disabled={coverUploading}
+                  className="w-fit border border-zinc-300 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-700 transition-colors hover:border-zinc-900 hover:text-zinc-900 disabled:opacity-40"
+                >
+                  {coverImageUrl ? "Replace cover" : "Upload cover"}
+                </button>
+                {coverImageUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCoverImageUrl("");
+                      isDirty.current = true;
+                    }}
+                    className="w-fit font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500 underline-offset-4 hover:text-zinc-900"
+                  >
+                    Remove cover
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Toolbar — sticky under dashboard header while scrolling */}
         {editor && (
-          <div className="mb-4 flex flex-wrap items-center gap-0.5 border border-zinc-200 p-1">
+          <div
+            className={cn(
+              "sticky top-14 z-10 -mx-6 mb-4 border-b border-zinc-200 bg-white px-6 py-2",
+              showLinkInput && "pb-3"
+            )}
+          >
+            <div className="flex flex-wrap items-center gap-0.5 border border-zinc-200 p-1">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
               active={editor.isActive("heading", { level: 1 })}
@@ -493,30 +619,30 @@ export default function ArticleEditor({
             >
               <ImageIcon size={15} />
             </ToolbarButton>
-          </div>
-        )}
+            </div>
 
-        {/* Link input */}
-        {showLinkInput && (
-          <div className="mb-4 flex items-center gap-2 border border-zinc-200 p-2">
-            <input
-              autoFocus
-              type="url"
-              placeholder="https://example.com"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addLink();
-                if (e.key === "Escape") setShowLinkInput(false);
-              }}
-              className="flex-1 bg-transparent font-mono text-xs text-zinc-700 outline-none placeholder:text-zinc-400"
-            />
-            <button
-              onClick={addLink}
-              className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-700 hover:text-cyan-900"
-            >
-              Apply
-            </button>
+            {showLinkInput ? (
+              <div className="mt-3 flex items-center gap-2 border border-zinc-200 p-2">
+                <input
+                  autoFocus
+                  type="url"
+                  placeholder="https://example.com"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") addLink();
+                    if (e.key === "Escape") setShowLinkInput(false);
+                  }}
+                  className="flex-1 bg-transparent font-mono text-xs text-zinc-700 outline-none placeholder:text-zinc-400"
+                />
+                <button
+                  onClick={addLink}
+                  className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-cyan-700 hover:text-cyan-900"
+                >
+                  Apply
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
 

@@ -20,6 +20,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${post.title} | Caliga`,
     description: post.excerpt,
+    ...(post.coverImageUrl && {
+      openGraph: {
+        images: [{ url: post.coverImageUrl, alt: post.title }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        images: [post.coverImageUrl],
+      },
+    }),
   };
 }
 
@@ -47,10 +56,30 @@ export default async function WritingPostPage({ params }: Props) {
             </p>
           )}
 
+          {post.coverImageUrl ? (
+            <div className="mt-10 max-w-3xl border border-zinc-200 bg-zinc-50">
+              {/* eslint-disable-next-line @next/next/no-img-element -- public Supabase storage URL */}
+              <img
+                src={post.coverImageUrl}
+                alt={post.title}
+                className="max-h-[min(70vh,520px)] w-full object-cover"
+              />
+            </div>
+          ) : null}
+
           <div
-            className="prose prose-zinc prose-lg mt-14 max-w-3xl"
+            className={`prose prose-zinc prose-lg max-w-3xl ${post.coverImageUrl ? "mt-10" : "mt-14"}`}
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
+
+          {post.writtenBy ? (
+            <p className="mt-12 max-w-3xl border-t border-zinc-200 pt-8 font-serif-display text-sm text-zinc-600">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+                Written by{" "}
+              </span>
+              <span className="text-zinc-900">{post.writtenBy}</span>
+            </p>
+          ) : null}
 
           <p className="mt-14">
             <Link
